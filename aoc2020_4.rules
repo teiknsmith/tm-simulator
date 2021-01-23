@@ -1,0 +1,495 @@
+; a solution to https://adventofcode.com/2020/day/4 part 2
+; designed to run on my personal tm simulator
+; it is modelled after http://morphett.info/turing/
+; the tm simulator does not work well with whitespace characters
+; so the input is changed to have replacement characters:
+; replace newlines with `/` and spaces with `~` (tr is a handy tool)
+
+; start at ins/ instead of 0
+0 * * * ins/
+
+; dummy rule to get 'x' involved for my program parser (it is in the input but not any other rules)
+dummy x x * *
+
+; in states replace / with ~ and put $ between pps
+ins/ / ~ r in/
+ins/ _ $ r intail
+ins/ * * r *
+
+in/ / ^ l inppgap
+in/ _ * l intailnl
+in/ * * * ins/
+
+intailnl ~ $ r intail
+inppgap ~ $ r ins/
+
+intail _ + l inret
+
+inret _ ^ * sbyr~
+inret * * l *
+
+; adv states advance to next pp (entered into by following states)
+adv $ * r sbyr~
+adv * * r *
+
+; sbyr states search for byr
+sbyr~ + * * sum0
+sbyr~ ~ ~ r sbyrb
+sbyr~ ^ ^ r sbyrb
+sbyr~ $ * r *
+sbyr~ * * r *
+sbyrb b b r sbyry
+sbyrb $ * r sbyr~
+sbyrb * * r sbyr~
+sbyry y y r sbyrr
+sbyry $ * r sbyr~
+sbyry * * r sbyr~
+sbyrr r r r sbyr:
+sbyrr $ * r sbyr~
+sbyrr * * r sbyr~
+sbyr: : : r vbyr0
+sbyr: $ * r sbyr~
+sbyr: * * r sbyr~
+
+; vbyr states validate byr
+vbyr0 1 * r vbyr1
+vbyr0 2 * r vbyr2
+vbyr0 * * * adv
+vbyr1 9 * r vbyr19
+vbyr1 * * * adv
+vbyr19 2 * r vbyr19.
+vbyr19 3 * r vbyr19.
+vbyr19 4 * r vbyr19.
+vbyr19 5 * r vbyr19.
+vbyr19 6 * r vbyr19.
+vbyr19 7 * r vbyr19.
+vbyr19 8 * r vbyr19.
+vbyr19 9 * r vbyr19.
+vbyr19 * * * adv
+vbyr19. 0 * r vbyr19..
+vbyr19. 1 * r vbyr19..
+vbyr19. 2 * r vbyr19..
+vbyr19. 3 * r vbyr19..
+vbyr19. 4 * r vbyr19..
+vbyr19. 5 * r vbyr19..
+vbyr19. 6 * r vbyr19..
+vbyr19. 7 * r vbyr19..
+vbyr19. 8 * r vbyr19..
+vbyr19. 9 * r vbyr19..
+vbyr19. * * * adv
+vbyr19.. ~ * l byrret
+vbyr19.. $ * l byrret
+vbyr19.. * * * adv
+vbyr2 0 * r vbyr20
+vbyr2 * * * adv
+vbyr20 0 * r vbyr200
+vbyr20 * * * adv
+vbyr200 0 * r vbyr200.
+vbyr200 1 * r vbyr200.
+vbyr200 2 * r vbyr200.
+vbyr200 * * * adv
+vbyr200. ~ * l byrret
+vbyr200. $ * l byrret
+vbyr200. * * * adv
+
+; byrret return to start of pp to begin next check
+byrret ^ * * siyr~
+byrret * * l *
+
+; siyr states search for iyr
+siyr~ ~ ~ r siyri
+siyr~ ^ ^ r siyri
+siyr~ $ * r sbyr~
+siyr~ * * r *
+siyri i i r siyry
+siyri $ * r sbyr~
+siyri * * r siyr~
+siyry y y r siyrr
+siyry $ * r sbyr~
+siyry * * r siyr~
+siyrr r r r siyr:
+siyrr $ * r sbyr~
+siyrr * * r siyr~
+siyr: : : r viyr0
+siyr: $ * r sbyr~
+siyr: * * r siyr~
+
+; viyr states validate iyr
+viyr0 2 * r viyr2
+viyr0 * * * adv
+viyr2 0 * r viyr20
+viyr2 * * * adv
+viyr20 2 * r viyr202
+viyr20 1 * r viyr201
+viyr20 * * * adv
+viyr202 0 * r viyr20..
+viyr202 * * * adv
+viyr201 0 * r viyr20..
+viyr201 1 * r viyr20..
+viyr201 2 * r viyr20..
+viyr201 3 * r viyr20..
+viyr201 4 * r viyr20..
+viyr201 5 * r viyr20..
+viyr201 6 * r viyr20..
+viyr201 7 * r viyr20..
+viyr201 8 * r viyr20..
+viyr201 9 * r viyr20..
+viyr201 * * * adv
+viyr20.. ~ * l iyrret
+viyr20.. $ * l iyrret
+viyr20.. * * * adv
+
+; iyrret return to start of pp to begin next check
+iyrret ^ * * seyr~
+iyrret * * l *
+
+; seyr states search for eyr
+seyr~ ~ ~ r seyre
+seyr~ ^ ^ r seyre
+seyr~ $ * r sbyr~
+seyr~ * * r *
+seyre e e r seyry
+seyre $ * r sbyr~
+seyre * * r seyr~
+seyry y y r seyrr
+seyry $ * r sbyr~
+seyry * * r seyr~
+seyrr r r r seyr:
+seyrr $ * r sbyr~
+seyrr * * r seyr~
+seyr: : : r veyr0
+seyr: $ * r sbyr~
+seyr: * * r seyr~
+
+; veyr states validate eyr
+veyr0 2 * r veyr2
+veyr0 * * * adv
+veyr2 0 * r veyr20
+veyr2 * * * adv
+veyr20 3 * r veyr203
+veyr20 2 * r veyr202
+veyr20 * * * adv
+veyr203 0 * r veyr20..
+veyr203 * * * adv
+veyr202 0 * r veyr20..
+veyr202 1 * r veyr20..
+veyr202 2 * r veyr20..
+veyr202 3 * r veyr20..
+veyr202 4 * r veyr20..
+veyr202 5 * r veyr20..
+veyr202 6 * r veyr20..
+veyr202 7 * r veyr20..
+veyr202 8 * r veyr20..
+veyr202 9 * r veyr20..
+veyr202 * * * adv
+veyr20.. ~ * l eyrret
+veyr20.. $ * l eyrret
+veyr20.. * * * adv
+
+; eyrret return to start of pp to begin next check
+eyrret ^ * * shgt~
+eyrret * * l *
+
+; shgt states search for hgt
+shgt~ ~ ~ r shgth
+shgt~ ^ ^ r shgth
+shgt~ $ * r sbyr~
+shgt~ * * r *
+shgth h h r shgtg
+shgth $ * r sbyr~
+shgth * * r shgt~
+shgtg g g r shgtt
+shgtg $ * r sbyr~
+shgtg * * r shgt~
+shgtt t t r shgt:
+shgtt $ * r sbyr~
+shgtt * * r shgt~
+shgt: : : r vhgt0
+shgt: $ * r sbyr~
+shgt: * * r shgt~
+
+; vhgt states validate hgt
+vhgt0 * * * vhgts~
+vhgts~ ~ * l vhgtunit
+vhgts~ $ * l vhgtunit
+vhgts~ * * r *
+vhgtunit n * l vhgtn
+vhgtunit m * l vhgtm
+vhgtunit * * * adv
+vhgtn i * l vhgtin0
+vhgtn * * * adv
+vhgtm c * l vhgtcm0
+vhgtm * * * adv
+vhgtin0 * * l vhgtin1
+vhgtin1 * * l vhgtin:
+vhgtin: : * r vhgtindig0
+vhgtin: * * * adv
+vhgtcm0 * * l vhgtcm1
+vhgtcm1 * * l vhgtcm2
+vhgtcm2 * * l vhgtcm:
+vhgtcm: : * r vhgtcmdig0
+vhgtcm: * * * adv
+vhgtindig0 5 * r vhgtindig5
+vhgtindig0 6 * r vhgtindig6
+vhgtindig0 7 * r vhgtindig7
+vhgtindig0 * * * adv
+vhgtindig5 9 * l hgtret
+vhgtindig5 * * * adv
+vhgtindig6 0 * l hgtret
+vhgtindig6 1 * l hgtret
+vhgtindig6 2 * l hgtret
+vhgtindig6 3 * l hgtret
+vhgtindig6 4 * l hgtret
+vhgtindig6 5 * l hgtret
+vhgtindig6 6 * l hgtret
+vhgtindig6 7 * l hgtret
+vhgtindig6 8 * l hgtret
+vhgtindig6 9 * l hgtret
+vhgtindig6 * * * adv
+vhgtindig7 0 * l hgtret
+vhgtindig7 1 * l hgtret
+vhgtindig7 2 * l hgtret
+vhgtindig7 3 * l hgtret
+vhgtindig7 4 * l hgtret
+vhgtindig7 5 * l hgtret
+vhgtindig7 6 * l hgtret
+vhgtindig7 * * * adv
+vhgtcmdig0 1 * r vhgtcmdig1
+vhgtcmdig1 5 * r vhgtcmdig1.
+vhgtcmdig1 6 * r vhgtcmdig1.
+vhgtcmdig1 7 * r vhgtcmdig1.
+vhgtcmdig1 8 * r vhgtcmdig1.
+vhgtcmdig1 9 * r vhgtcmdig19
+vhgtcmdig1 * * * adv
+vhgtcmdig1. 0 * l hgtret
+vhgtcmdig1. 1 * l hgtret
+vhgtcmdig1. 2 * l hgtret
+vhgtcmdig1. 3 * l hgtret
+vhgtcmdig1. 4 * l hgtret
+vhgtcmdig1. 5 * l hgtret
+vhgtcmdig1. 6 * l hgtret
+vhgtcmdig1. 7 * l hgtret
+vhgtcmdig1. 8 * l hgtret
+vhgtcmdig1. 9 * l hgtret
+vhgtcmdig1. * * * adv
+vhgtcmdig19 0 * l hgtret
+vhgtcmdig19 1 * l hgtret
+vhgtcmdig19 2 * l hgtret
+vhgtcmdig19 3 * l hgtret
+vhgtcmdig19 * * * adv
+
+; hgtret return to start of pp to begin next check
+hgtret ^ * * shcl~
+hgtret * * l *
+
+; shcl states search for hcl
+shcl~ ~ ~ r shclh
+shcl~ ^ ^ r shclh
+shcl~ $ * r sbyr~
+shcl~ * * r *
+shclh h h r shclc
+shclh $ * r sbyr~
+shclh * * r shcl~
+shclc c c r shcll
+shclc $ * r sbyr~
+shclc * * r shcl~
+shcll l l r shcl:
+shcll $ * r sbyr~
+shcll * * r shcl~
+shcl: : : r vhcl0
+shcl: $ * r sbyr~
+shcl: * * r shcl~
+
+; vhcl states validate hcl
+vhcl0 # * r vhclsdig
+vhcl0 * * * adv
+vhclsdig ~ * * vhclvals#
+vhclsdig $ * * vhclvals#
+vhclsdig z * r *
+vhclsdig 0 z l vhcls#
+vhclsdig 1 z l vhcls#
+vhclsdig 2 z l vhcls#
+vhclsdig 3 z l vhcls#
+vhclsdig 4 z l vhcls#
+vhclsdig 5 z l vhcls#
+vhclsdig 6 z l vhcls#
+vhclsdig 7 z l vhcls#
+vhclsdig 8 z l vhcls#
+vhclsdig 9 z l vhcls#
+vhclsdig a z l vhcls#
+vhclsdig b z l vhcls#
+vhclsdig c z l vhcls#
+vhclsdig d z l vhcls#
+vhclsdig e z l vhcls#
+vhclsdig f z l vhcls#
+vhclsdig * * * adv
+vhcls# # * r vhclinc
+vhcls# * * l *
+vhclinc A B r vhclsdig
+vhclinc B C r vhclsdig
+vhclinc C D r vhclsdig
+vhclinc D E r vhclsdig
+vhclinc E F r vhclsdig
+vhclinc F * * adv
+vhclinc * A r vhclsdig
+vhclvals# # * r vhclvalnum
+vhclvals# * * l *
+vhclvalnum F * l hclret
+vhclvalnum * * * adv
+
+; hclret return to start of pp to begin next check
+hclret ^ * * secl~
+hclret * * l *
+
+; secl states search for ecl
+secl~ ~ ~ r secle
+secl~ ^ ^ r secle
+secl~ $ * r sbyr~
+secl~ * * r *
+secle e e r seclc
+secle $ * r sbyr~
+secle * * r secl~
+seclc c c r secll
+seclc $ * r sbyr~
+seclc * * r secl~
+secll l l r secl:
+secll $ * r sbyr~
+secll * * r secl~
+secl: : : r vecl0
+secl: $ * r sbyr~
+secl: * * r secl~
+
+; vecl states validate ecl
+vecl0 a * r vecla
+vecl0 b * r veclb
+vecl0 g * r veclg
+vecl0 h * r veclh
+vecl0 o * r veclo
+vecl0 * * * adv
+vecla m * r veclam
+vecla * * * adv
+veclam b * r vecl...
+veclam * * * adv
+veclb l * r veclbl
+veclb r * r veclbr
+veclb * * * adv
+veclbl u * r vecl...
+veclbl * * * adv
+veclbr n * r vecl...
+veclbr * * * adv
+veclg r * r veclgr
+veclg * * * adv
+veclgr y * r vecl...
+veclgr n * r vecl...
+veclgr * * * adv
+veclh z * r veclhz
+veclh * * * adv
+veclhz l * r vecl...
+veclhz * * * adv
+veclo t * r veclot
+veclo * * * adv
+veclot h * r vecl...
+veclot * * * adv
+vecl... ~ * l eclret
+vecl... $ * l eclret
+vecl... * * * adv
+
+; eclret return to start of pp to begin next check
+eclret ^ * * spid~
+eclret * * l *
+
+; spid states search for pid
+spid~ ~ ~ r spidp
+spid~ ^ ^ r spidp
+spid~ $ * r sbyr~
+spid~ * * r *
+spidp p p r spidi
+spidp $ * r sbyr~
+spidp * * r spid~
+spidi i i r spidd
+spidi $ * r sbyr~
+spidi * * r spid~
+spidd d d r spid:
+spidd $ * r sbyr~
+spidd * * r spid~
+spid: : : r vpid0
+spid: $ * r sbyr~
+spid: * * r spid~
+
+; vpid states validate pid
+vpid0 * * * vpidsdig
+vpidsdig ~ * * vpidvals:
+vpidsdig $ * * vpidvals:
+vpidsdig z * r *
+vpidsdig 0 z l vpids:
+vpidsdig 1 z l vpids:
+vpidsdig 2 z l vpids:
+vpidsdig 3 z l vpids:
+vpidsdig 4 z l vpids:
+vpidsdig 5 z l vpids:
+vpidsdig 6 z l vpids:
+vpidsdig 7 z l vpids:
+vpidsdig 8 z l vpids:
+vpidsdig 9 z l vpids:
+vpidsdig * * * adv
+vpids: : * r vpidinc
+vpids: * * l *
+vpidinc A B r vpidsdig
+vpidinc B C r vpidsdig
+vpidinc C D r vpidsdig
+vpidinc D E r vpidsdig
+vpidinc E F r vpidsdig
+vpidinc F G r vpidsdig
+vpidinc G H r vpidsdig
+vpidinc H I r vpidsdig
+vpidinc I * * adv
+vpidinc * A r vpidsdig
+vpidvals: : * r vpidvalnum
+vpidvals: * * l *
+vpidvalnum I * l pidret
+vpidvalnum * * * adv
+
+; pid is final check so pidret -> tally
+pidret * * * tally0
+
+; tally states add a tally at the end
+tally0 ^ * l * ;don't overwrite the start mark
+tally0 * ] r tallys+
+tallys+ + * r tallys_
+tallys+ * * r *
+tallys_ _ 1 l tallyret
+tallys_ * * r *
+tallyret ] * * adv
+tallyret * * l *
+
+;=============================================
+; sum phase - turn tally into a base-10 number
+;=============================================
+; actually start by clearing everything else
+sum0 + * l clearl
+clearl _ * r clearret
+clearl * _ l *
+clearret + * r bins_
+clearret _ * r *
+
+; then do adding
+bins_ _ * l bintail
+bins_ * * r *
+bintail + _ l findhome ; all done! just return tapehead to left of result
+bintail 1 _ l bins+
+bins+ + * l decinc
+bins+ * * l *
+decinc _ 1 r bins_
+decinc 0 1 r bins_
+decinc 1 2 r bins_
+decinc 2 3 r bins_
+decinc 3 4 r bins_
+decinc 4 5 r bins_
+decinc 5 6 r bins_
+decinc 6 7 r bins_
+decinc 7 8 r bins_
+decinc 8 9 r bins_
+decinc 9 0 l decinc
+
+findhome _ * r halt
+findhome * * l *

@@ -1,0 +1,12 @@
+#ifndef EXIT_CODES_H
+#define EXIT_CODES_H
+
+#define EXIT_AOK 0
+#define EXIT_USAGE_ERR 1
+#define EXIT_PARSE_ERR 2
+#define EXIT_USER_LOGIC_ERR 3
+#define EXIT_RUNTIME_ERR 4
+#define EXIT_INTERNAL_LOGIC_ERR 5
+#define EXIT_INTERRUPT 6
+
+#endif
