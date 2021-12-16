@@ -108,9 +108,11 @@ int main(int argc, char **argv) {
     //   fancy_print(printer);
     //   usleep(10);
     // }
-    fancy_print(printer);
+    if (micros_to_sleep) {
+      fancy_print(printer);
+      usleep(micros_to_sleep);
+    }
     step(running_program);
-    usleep(micros_to_sleep);
   }
   fancy_print(printer);
 

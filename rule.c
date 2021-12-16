@@ -39,7 +39,7 @@ int is_empty(char *s) {
 
   char *scan = s;
   while (*++scan)
-    if (!isspace(*scan)) return 0;
+    if (!isspace(*scan)) return *scan == ';'; // allow comments with spaces before the `;`
   return 1;
 }
 
