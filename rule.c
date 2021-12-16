@@ -47,7 +47,7 @@ int has_gte_n_fields(char *s, unsigned int n) {
   unsigned int num_fields = 0;
   char prev_c = ' ';
   char *scan = s;
-  while (scan) {
+  while (*scan) {
     if (isspace(*scan) && !isspace(prev_c)) num_fields++;
     if (num_fields == n) return 1;
     prev_c = *(scan++);
