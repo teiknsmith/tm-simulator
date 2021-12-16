@@ -1,3 +1,4 @@
 # tm-simulator
-a command-line turing machine simulator
-modelled after http://morphett.info/turing/
+a command-line Turing Machine simulator modelled after http://morphett.info/turing/
+
+the online simulator is great for taking small steps and visualizing/debugging (I used it a fair deal early on in my discoveries of Turing Machines), but for longer computations a more efficient simulator was needed. while js engines may be well-improved in the last decade, it's still hard to beat pre-compiled C code. in addition, this simulator translates the input program to an equivalent program with integer state identifiers for faster transition lookups and has an option to omit displaying any intermediate steps. as a comparison, the sample program here takes multiple hours to run on the web simulator, but less than a 10th of a second on the C simulator
